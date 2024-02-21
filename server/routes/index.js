@@ -6,10 +6,13 @@ const express = require('express');
 const router = express.Router();
 
 let currentSeed = constants.CURRENTSEEDSTART;
+let generateDataExecuted = false;
 
 router.get('/generateData', async (req, res) => {
     try {
         const { region = 'ru', errorCount = 0, seed = currentSeed } = req.query;
+
+        generateDataExecuted = true;
 
         const data = await fakeData(
             region,
@@ -25,7 +28,12 @@ router.get('/generateData', async (req, res) => {
 
 router.get('/generateNextData', async (req, res) => {
     try {
-        const { region = 'ru', errorCount = 0 } = req.query;
+        const { region = 'ru', errorCount = 0, seed } = req.query;
+
+        if (generateDataExecuted) {
+            currentSeed = seed;
+            generateDataExecuted = false; // Сбрасываем флаг после обнуления
+        }
         currentSeed++;
 
         const data = await fakeData(
